@@ -202,10 +202,11 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
   "[internal] "
   (let* ((elm-type (car elm))
          (elm-plist (cdr elm)))
-    (case elm-type
+    (cl-case elm-type
      ('input (wmvc:tmpl-make-widget-input elm-plist context))
      ('button (wmvc:tmpl-make-widget-button elm-plist context))
-     ('message (wmvc:tmpl-make-widget-message elm-plist context)))))
+     ('message (wmvc:tmpl-make-widget-message elm-plist context))
+     (t (wmvc:tmpl-widget-create elm-plist context elm-type)))))
 
 (defun wmvc:tmpl-make-widget-input (elm-plist context)
   (let* ((type (plist-get elm-plist ':type)) 
