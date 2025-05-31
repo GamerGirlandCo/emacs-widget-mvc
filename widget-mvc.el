@@ -194,7 +194,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
       (let ((inhibit-read-only t))
         (erase-buffer))
       (remove-overlays)
-      (loop for elm in tmpl-src
+      (cl-loop for elm in tmpl-src
             do
             (cond
              ((consp elm)
@@ -220,7 +220,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
                  (need-validation (plist-get elm-plist ':validation))
                  (notify (lambda (&rest ignore)
                            (wmvc:action-invoke action need-validation)))
-                 (args (loop for (k v) on args by 'cddr
+                 (args (cl-loop for (k v) on args by 'cddr
                              if v append (list k v)))
                  (help-echo (or (plist-get args ':help-echo)
                                 (plist-get elm-plist ':help-echo))))
@@ -312,7 +312,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
       :args
       (cond
        ((consp (car options))
-        (loop for i = (pop options)
+        (cl-loop for i = (pop options)
               while i
               for (item-title . value) = i
               for format = (cond ((and horizontal (car options)) "%t ")
@@ -321,7 +321,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
               collect
               (list 'item ':tag item-title ':value value ':format format)))
        (t
-        (loop for i = (pop options)
+        (cl-loop for i = (pop options)
               while i
               for format = (cond ((and horizontal (car options)) "%t ")
                                  ((car options)                  "%t\n")
@@ -342,12 +342,12 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
       :args
       (cond
        ((consp (car options))
-        (loop for i in options
+        (cl-loop for i in options
               for (item-title . value) = i
               collect
               (list 'item ':tag item-title ':value value ':format "%t")))
        (t
-        (loop for i in options
+        (cl-loop for i in options
               collect
               (list 'item ':tag (format "%s" i) ':value i ':format "%t")))))))
 
@@ -366,7 +366,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
       :args
       (cond
        ((consp (car options))
-        (loop for i = (pop options)
+        (cl-loop for i = (pop options)
               while i
               for (item-title . value) = i
               for format = (cond ((and horizontal (car options)) "%t ")
@@ -375,7 +375,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
               collect
               (list 'item ':tag item-title ':value value ':format format)))
        (t
-        (loop for i = (pop options)
+        (cl-loop for i = (pop options)
               while i
               for format = (cond ((and horizontal (car options)) "%t ")
                                  ((car options)                  "%t\n")
@@ -439,7 +439,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
 
 (defun wmvc:bind-from-model (context)
   "[internal] "
-  (loop with widget-map = (wmvc:context-widget-map context)
+  (cl-loop with widget-map = (wmvc:context-widget-map context)
         with model = (wmvc:context-model context)
         for (name . widget) in widget-map
         for (fname . data) = (assq name model)
@@ -453,7 +453,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
           (widget-setup))))
 
 (defun wmvc:bind-from-widgets (context)
-  (loop with widget-map = (wmvc:context-widget-map context)
+  (cl-loop with widget-map = (wmvc:context-widget-map context)
         with model = (wmvc:context-model context)
         for (name . widget) in widget-map
         for pair = (assq name model)
@@ -466,7 +466,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
   (let* ((ctx wmvc:context)
          (validations (wmvc:context-validations ctx))
          (fails ; list of (name . fail-message)
-          (loop for (name . vs) in validations
+          (cl-loop for (name . vs) in validations
                 for validation-func = (if (consp vs) (car vs) vs)
                 for validation-args = (if (consp vs) (cdr vs))
                 for value = (cdr (assq name model))
