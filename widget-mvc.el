@@ -1,9 +1,10 @@
-;;; widget-mvc.el --- MVC framework for the emacs widgets
+;;; widget-mvc.el --- MVC framework for the emacs widgets  -*- lexical-binding: t; -*-
 
 ;; Author: SAKURAI Masashi <m.sakurai at kiwanami.net>
-;; Copyright (C) 2013 
+;; Copyright (C) 2013
 ;; Keywords: lisp, widget
 ;; Version: 0.0.2
+;; Package-Requires: ((emacs "28.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -43,9 +44,10 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(eval-when-compile (require 'cl-lib))
 (require 'widget)
 (require 'wid-edit)
+(require 'dash)
 (require 'date-field nil t)
 
 
@@ -129,7 +131,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
 ;; action-map  : an alist of the action functions
 ;; attributes  : an alist of custom attributes for user programs
 
-(defstruct wmvc:context lang template model validations widget-map action-map attributes)
+(cl-defstruct wmvc:context lang template model validations widget-map action-map attributes)
 
 (defvar wmvc:context nil)
 
@@ -153,6 +155,36 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
 
 
 ;;; Template
+
+(cl-defmacro wmvc:tmpl (context &rest tmpl)
+  (print (format "CONTEXT %S" (eval context)))
+  (print (format "TMPL %S %S" tmpl (listp tmpl)))
+  (let*
+      (
+       (tmpl-symbol (make-symbol "tpl"))
+       (ctx (eval context))
+       (model (wmvc:context-model ctx))
+       (actions (wmvc:context-action-map ctx))
+       )
+    `(let* ,(append
+             `((,tmpl-symbol '(,@tmpl)))
+             (mapcar (lambda (item)
+                       `(,(car item) ,(alist-get (car item) model))
+                       )
+                     model)
+                      (mapcar (lambda (item)
+                                      `(,(car item) ,(alist-get (car item) actions))
+                                      )
+                              actions)
+                    )
+        (list ,@(cl-loop for x in `,tmpl
+                          do
+                          (print (format "x = %S" x))
+                          collecting x
+                ))
+       )
+      )
+  )
 
 (defun wmvc:tmpl-build-buffer(buffer context)
   (let ((tmpl-src (wmvc:context-template context))
@@ -542,7 +574,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
     (wmvc:tmpl-build-buffer buffer context)
     buffer))
 
-(defun* wmvc:build-buffer(&key buffer tmpl model actions validations attributes lang)
+(defun wmvc:build-buffer(&key buffer tmpl model actions validations attributes lang)
   (let ((context
          (make-wmvc:context 
           :template tmpl :model model 
