@@ -167,7 +167,7 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
        (actions (wmvc:context-action-map ctx))
        )
     `(let* ,(append
-             `((,tmpl-symbol '(,@tmpl)))
+;             `((,tmpl-symbol '(,@tmpl)))
              (mapcar (lambda (item)
                        `(,(car item) ,(alist-get (car item) model))
                        )
@@ -187,7 +187,8 @@ CTX is a `wmvc:context'. If nil, use `current-language-environment'."
   )
 
 (defun wmvc:tmpl-build-buffer(buffer context)
-  (let ((tmpl-src (wmvc:context-template context))
+  (print (wmvc:context-template context))
+  (let ((tmpl-src (apply 'wmvc:tmpl (append (list context) (wmvc:context-template context))))
         (model (wmvc:context-model context)))
     (with-current-buffer buffer
       (setf (wmvc:context-widget-map context) nil)
